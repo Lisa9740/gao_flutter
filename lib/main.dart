@@ -1,7 +1,8 @@
 // main.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:gao_flutter/controllers/computers.controller.dart';
-import 'package:expansion_tile_card/expansion_tile_card.dart';
+
 
 import 'components/computer.dart';
 
@@ -17,6 +18,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       // Remove the debug banner
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate
+        ],
+        supportedLocales: const [
+          Locale('en'),
+          Locale('fr')
+        ],
         debugShowCheckedModeBanner: false,
         title: 'Kindacode.com',
         theme: ThemeData(
@@ -53,16 +61,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   final TextEditingController _nameController = TextEditingController();
-
+  DateTime currentDate = DateTime.now();
   // This function will be triggered when the floating button is pressed
   // It will also be triggered when you want to update an item
   void _showForm(int? id) async {
     if (id != null) {
       // id == null -> create new item
       // id != null -> update an existing item
-      final existingJournal =
+      final existingComputer =
       _computers.firstWhere((element) => element['id'] == id);
-      _nameController.text = existingJournal['name'];
+      _nameController.text = existingComputer['name'];
     }
 
     showModalBottomSheet(
@@ -123,6 +131,19 @@ class _HomePageState extends State<HomePage> {
     _refreshJournals();
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+        context: context,
+        locale : const Locale("fr","FR"),
+        initialDate: currentDate,
+        firstDate: DateTime(2015),
+        lastDate: DateTime(2050));
+    if (pickedDate != null && pickedDate != currentDate) {
+      setState(() {
+        currentDate = pickedDate;
+      });
+    }
+  }
   // Delete an item
   void _deleteItem(int id) async {
     await Computers.deleteComputer(id);
@@ -138,20 +159,33 @@ class _HomePageState extends State<HomePage> {
       body: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
-              SliverAppBar(
+              const SliverAppBar(
                 pinned: true,
-                title: new Text('GAO Flutter'),
+                title: Text('GAO Flutter'),
               ),
             ];
           },
-          body:    _isLoading
+          body: _isLoading
               ? const Center(
             child: CircularProgressIndicator(),
           ) :
           Column(
             children: [
+            const SizedBox(
+              height: 20,
+            ),
               Container(
-                  height: 600.0,
+                height: 30.0,
+                child: Text(currentDate.toString()),
+              ),
+              Container(
+                child: RaisedButton(
+                  onPressed: () => _selectDate(context),
+                  child: Text('Selectionner une date'),
+                ),
+              ),
+              Container(
+                  height: 500.0,
                   child: ListView.builder(
                     itemCount: _computers.length,
                     itemBuilder: (context, index) =>
@@ -184,9 +218,9 @@ class _HomePageState extends State<HomePage> {
                       )
                   )
               )
-                ]
-                )
-              ),
+            ]
+          )
+      ),
 
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
