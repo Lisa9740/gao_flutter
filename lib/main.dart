@@ -1,6 +1,7 @@
 // main.dart
 import 'package:flutter/material.dart';
 import 'package:gao_flutter/controllers/computers.controller.dart';
+import 'package:expansion_tile_card/expansion_tile_card.dart';
 
 import 'components/computer.dart';
 
@@ -33,9 +34,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // All journals
   List<Map<String, dynamic>> _computers = [];
-  final _hourSlots = [ 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
 
   bool _isLoading = true;
   // This function is used to fetch all data from the database
@@ -141,7 +140,7 @@ class _HomePageState extends State<HomePage> {
             return <Widget>[
               SliverAppBar(
                 pinned: true,
-                title: new Text('Flutter Demo'),
+                title: new Text('GAO Flutter'),
               ),
             ];
           },
@@ -152,15 +151,12 @@ class _HomePageState extends State<HomePage> {
           Column(
             children: [
               Container(
-                  height: 300.0,
+                  height: 600.0,
                   child: ListView.builder(
                     itemCount: _computers.length,
-                    itemBuilder: (context, index) => Card(
-                        color: Colors.orange[200],
-                        margin: const EdgeInsets.all(15),
-                        child: Column(
-                          children: [
-                            ListTile(
+                    itemBuilder: (context, index) =>
+                        ExpansionTile(
+                            title: ListTile(
                                 title: Text(_computers[index]['name']),
                                 trailing: SizedBox(
                                   width: 100,
@@ -178,27 +174,20 @@ class _HomePageState extends State<HomePage> {
                                     ],
                                   ),
                                 )),
-                            Container(
-                              height: 300.0,
-                                child:
-                                ListView.builder(
-                                    itemCount: _hourSlots.length,
-                                    itemBuilder: (context, index) =>
-                                        Text(_hourSlots[index].toString() + " h")
-                                ),
-                            )
-                          ],
-                        )
-
-                    ),
+                            children: [
+                              const Divider(
+                                thickness: 1.0,
+                                height: 1.0,
+                              ),
+                              computer(context, index, _computers)
+                            ]
+                      )
                   )
               )
-            ],
-          )
+                ]
+                )
+              ),
 
-
-
-      ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () => _showForm(null),
