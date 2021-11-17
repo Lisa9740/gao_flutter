@@ -1,13 +1,16 @@
-// main.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:gao_flutter/controllers/computers.controller.dart';
+import 'package:gao_flutter/providers/api/ComputerProvider.dart';
 
 
 import 'components/computer.dart';
+import 'models/computer.dart';
 
 
-void main() {
+Future main() async {
+  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
@@ -42,26 +45,29 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Map<String, dynamic>> _computers = [];
+  List<Computer> _computers = [];
+  final TextEditingController _nameController = TextEditingController();
+  DateTime currentDate = DateTime.now();
 
   bool _isLoading = true;
   // This function is used to fetch all data from the database
   void _refreshJournals() async {
-    final data = await Computers.getComputers();
-    setState(() {
-      _computers = data;
+    //final data = await Computers.getComputers();
+    final computer = await ComputerProvider().fetchComputer(currentDate, 1);
+    print(computer);
+     setState(() {
+      _computers = computer;
       _isLoading = false;
     });
   }
 
   @override
-  void initState() {
+  void initState()  {
     super.initState();
     _refreshJournals(); // Loading the diary when the app starts
   }
 
-  final TextEditingController _nameController = TextEditingController();
-  DateTime currentDate = DateTime.now();
+
   // This function will be triggered when the floating button is pressed
   // It will also be triggered when you want to update an item
   void _showForm(int? id) async {
@@ -69,8 +75,8 @@ class _HomePageState extends State<HomePage> {
       // id == null -> create new item
       // id != null -> update an existing item
       final existingComputer =
-      _computers.firstWhere((element) => element['id'] == id);
-      _nameController.text = existingComputer['name'];
+      _computers.firstWhere((element) => element.id == id);
+      _nameController.text = existingComputer.name;
     }
 
     showModalBottomSheet(
@@ -154,7 +160,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
     return Scaffold(
       body: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -187,36 +193,40 @@ class _HomePageState extends State<HomePage> {
               Container(
                   height: 500.0,
                   child: ListView.builder(
-                    itemCount: _computers.length,
-                    itemBuilder: (context, index) =>
-                        ExpansionTile(
-                            title: ListTile(
-                                title: Text(_computers[index]['name']),
-                                trailing: SizedBox(
-                                  width: 100,
-                                  child: Row(
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.edit),
-                                        onPressed: () => _showForm(_computers[index]['id']),
+                          itemCount: _computers.length,
+                          itemBuilder: (context, int index) {
+                           return ExpansionTile(
+                                title: ListTile(
+                                    title: Text(_computers[index].name.toString()),
+                                    trailing: SizedBox(
+                                      width: 100,
+                                      child: Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.edit),
+                                            onPressed: () => _showForm(
+                                                _computers[index].id),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.delete),
+                                            onPressed: () =>
+                                                _deleteItem(
+                                                    _computers[index].id),
+                                          ),
+                                        ],
                                       ),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete),
-                                        onPressed: () =>
-                                            _deleteItem(_computers[index]['id']),
-                                      ),
-                                    ],
+                                    )
+                                ),
+                                children: [
+                                  const Divider(
+                                    thickness: 1.0,
+                                    height: 1.0,
                                   ),
-                                )),
-                            children: [
-                              const Divider(
-                                thickness: 1.0,
-                                height: 1.0,
-                              ),
-                              computer(context, index, _computers)
-                            ]
-                      )
-                  )
+                                  computer(context, index, _computers)
+                                ]
+                            );
+                          },
+                  ),
               )
             ]
           )

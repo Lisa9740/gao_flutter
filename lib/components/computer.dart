@@ -53,7 +53,7 @@ Widget computer(BuildContext context, index, _computers) {
                     // Close the bottom sheet
                     Navigator.of(context).pop();
                   },
-                  child: Text('Ajouter'),
+                  child: const Text('Ajouter'),
                 )
               ],
             ),
