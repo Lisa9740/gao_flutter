@@ -40,6 +40,8 @@ dependencies:
   expansion_tile_card: ^2.0.0
   http: ^0.13.3
   flutter_dotenv: ^5.0.2
+  modal_bottom_sheet: ^2.0.0
+  flutter_typeahead: ^3.2.1
 
 dev_dependencies:
   flutter_test:

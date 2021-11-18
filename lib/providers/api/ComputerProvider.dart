@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gao_flutter/models/computer.dart';
+import 'package:gao_flutter/utils/snackbar.notif.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -23,7 +24,7 @@ class ComputerAPIProvider {
 
       return computers;
     } else {
-      throw Exception('Failed to load book computers');
+      throw Exception('Failed to load computers');
     }
   }
 
@@ -31,9 +32,9 @@ class ComputerAPIProvider {
     final response =  await http.post(Uri.parse(apiUrl + 'computer/create'), body: {'name': name});
 
     if (response.statusCode != 200){
-      return sendMessageSnackbar('Une erreur est survenue', context);
+      return SendNotificationSnackBar('Une erreur est survenue', context);
     }
-    return {'message' :'Une erreur est survenue !'};
+    return SendNotificationSnackBar('Poste ajouté avec succès !', context);
   }
 
   updateComputer(id, name, context) async{
@@ -41,23 +42,17 @@ class ComputerAPIProvider {
     print(response.statusCode);
 
     if (response.statusCode != 200){
-      return sendMessageSnackbar('Une erreur est survenue', context);
+      return SendNotificationSnackBar('Une erreur est survenue', context);
     }
-    return sendMessageSnackbar('Poste modifié avec succès !', context);
+    return SendNotificationSnackBar('Poste modifié avec succès !', context);
   }
 
   deleteComputer(id, context) async{
     final response =  await http.post(Uri.parse(apiUrl + 'computer/remove'), body: {'id': id.toString()});
     if (response.statusCode != 200){
-      return sendMessageSnackbar('Une erreur est survenue', context);
+      return SendNotificationSnackBar('Une erreur est survenue', context);
     }
-    return sendMessageSnackbar('Poste supprimé avec succès !', context);
+    return SendNotificationSnackBar('Poste supprimé avec succès !', context);
   }
 
-
-  sendMessageSnackbar(message, context) async{
-    return  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-    ));
-  }
 }

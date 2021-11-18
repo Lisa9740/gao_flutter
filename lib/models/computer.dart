@@ -1,8 +1,11 @@
 
+import 'package:gao_flutter/models/attribution.dart';
+
 class Computer {
+  var attributions;
   final int id;
   final String name;
-  final String attributions;
+
 
   Computer({
     required this.id,
@@ -13,7 +16,7 @@ class Computer {
 
   //creating a dart user object from the json object
   factory Computer.fromJson(Map<String, dynamic> json) {
-    return Computer(id: json['id'], name: json['name'], attributions: 'test');
+    return Computer(id: json['id'], name: json['name'], attributions: json['Attributions']);
   }
 
   Map<String, dynamic> toMap() {
