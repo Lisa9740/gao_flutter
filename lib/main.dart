@@ -10,7 +10,7 @@ import 'models/computer.dart';
 
 
 Future main() async {
-  await dotenv.load(fileName: ".env");
+  await dotenv.load();
   runApp(const MyApp());
 }
 
@@ -53,7 +53,7 @@ class _HomePageState extends State<HomePage> {
   // This function is used to fetch all data from the database
   void _refreshJournals() async {
     //final data = await Computers.getComputers();
-    final computer = await ComputerProvider().fetchComputer(currentDate, 1);
+    final computer = await ComputerAPIProvider().fetchComputer(currentDate, 1);
     print(computer);
      setState(() {
       _computers = computer;
@@ -106,7 +106,7 @@ class _HomePageState extends State<HomePage> {
                     }
 
                     if (id != null) {
-                      await _updateComputer(id);
+                      await _updateComputer(id.toString());
                     }
 
                     // Clear the text fields
@@ -125,15 +125,18 @@ class _HomePageState extends State<HomePage> {
 
 // Insert a new journal to the database
   Future<void> _addItem() async {
-    await Computers.createComputer(
-        _nameController.text);
+
+  /*  await Computers.createComputer(
+        _nameController.text);*/
+    await ComputerAPIProvider().createComputer(_nameController.text, context);
     _refreshJournals();
   }
 
   // Update an existing journal
-  Future<void> _updateComputer(int id) async {
-    await Computers.updateComputer(
-        id, _nameController.text);
+  Future<void> _updateComputer(id) async {
+    await ComputerAPIProvider().updateComputer(id, _nameController.text, context);
+   /* await Computers.updateComputer(
+        id, _nameController.text);*/
     _refreshJournals();
   }
 
@@ -152,10 +155,8 @@ class _HomePageState extends State<HomePage> {
   }
   // Delete an item
   void _deleteItem(int id) async {
-    await Computers.deleteComputer(id);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Suppression du poste réussi !'),
-    ));
+    await ComputerAPIProvider().deleteComputer(id, context);
+    //await Computers.deleteComputer(id);
     _refreshJournals();
   }
 
