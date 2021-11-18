@@ -1,4 +1,5 @@
 
+import 'package:date_format/date_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gao_flutter/models/computer.dart';
@@ -156,7 +157,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 Container(
                   height: 30.0,
-                  child: Text(currentDate.toString()),
+                  child: Text(formatDate(currentDate, [dd, '/', mm, '/', yyyy])),
                 ),
                 Container(
                   child: RaisedButton(
@@ -196,7 +197,7 @@ class _HomePageState extends State<HomePage> {
                               thickness: 1.0,
                               height: 1.0,
                             ),
-                            computer(context, index, _computers[index])
+                            computer(context, index, currentDate, _computers[index])
                           ]
                       );
                     },

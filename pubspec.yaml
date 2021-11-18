@@ -42,6 +42,7 @@ dependencies:
   flutter_dotenv: ^5.0.2
   modal_bottom_sheet: ^2.0.0
   flutter_typeahead: ^3.2.1
+  date_format: ^2.0.4
 
 dev_dependencies:
   flutter_test:
@@ -63,8 +64,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-  assets:
-    - .env
+  #assets:
+
 
   # To add assets to your application, add an assets section, like this:
 

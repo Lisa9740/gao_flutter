@@ -5,7 +5,7 @@ import 'package:gao_flutter/view/components/modals/attribution.modal.dart';
 
 
 
-Widget computer(BuildContext context, index, _computer) {
+Widget computer(BuildContext context, index,date,  _computer) {
   final _hourSlots = [ 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
 
   return
@@ -29,7 +29,7 @@ Widget computer(BuildContext context, index, _computer) {
                               SizedBox(
                                 height: 80,
                                 child: ListTile(
-                                    title: Text(_hourSlots[index].toString()),
+                                    title: Text(_hourSlots[index].toString() + ' h'),
                                     trailing: SizedBox(
                                       width: 100,
                                       child: Row(
@@ -37,7 +37,7 @@ Widget computer(BuildContext context, index, _computer) {
                                           IconButton(
                                             icon: const Icon(Icons.add_circle_outline),
                                             onPressed: () {
-                                              AttributionModal(_hourSlots[index],_hourSlots, _computer, context);
+                                              AttributionModal(_hourSlots[index],_hourSlots, _computer, date, context);
                                              // _showForm(_hourSlots[index]);
                                             },
                                           ),

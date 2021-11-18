@@ -1,38 +1,53 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:gao_flutter/models/customer.dart';
+import 'package:gao_flutter/providers/api/AttributionProvider.dart';
 import 'package:gao_flutter/providers/api/CustomerProvider.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-void AttributionModal(int index, slots, computer, context) async {
-  int _selectedCustomerId = 0;
+void AttributionModal(int hour, slots, computer, date, context) async {
+  var _selectedCustomerId = null;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _customerController = TextEditingController();
-    if (index != null) {
-      // id == null -> create new item
-      // id != null -> update an existing item
-      final slot = slots.firstWhere((element) => element == index);
-    }
 
-    showMaterialModalBottomSheet(
-        context: context,
-        expand: true,
-        elevation: 5,
-        builder: (_) => Container(
-          padding: const EdgeInsets.all(15),
-          width: double.infinity,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(
-                  height: 30,
-                ),
-                Text('Ajouter nouvelle attribution à ${index} h sur le ${computer.name.toString()}'),
-                const SizedBox(
-                  height: 30,
-                ),
+  formatDataToArray(str){
+    var formattedStr = str.toString();
+    return formattedStr.split(' ').map((String test) => test).toList();
+  }
+
+  getId(data){
+    return formatDataToArray(data)[0];
+  }
+
+  getName(data){
+    var name = formatDataToArray(data);
+    return name[1] + ' ' + name[2];
+  }
+
+  final slot = slots.firstWhere((element) => element == hour);
+
+  showMaterialModalBottomSheet(
+      context: context,
+      expand: true,
+      elevation: 5,
+      builder: (_) => Container(
+        padding: const EdgeInsets.all(15),
+        width: double.infinity,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                height: 30,
+              ),
+              Text('Ajouter nouvelle attribution à ${hour} h sur le ${computer.name.toString()}'),
+              const SizedBox(
+                height: 30,
+              ),
 
               Form(
                 key: _formKey,
@@ -46,15 +61,20 @@ void AttributionModal(int index, slots, computer, context) async {
                       ),
                   ),
                   suggestionsCallback: (pattern) async {
-                    return await CustomerAPIProvider().fetchCustomer(pattern);
+                    var response;
+                    response = await CustomerAPIProvider().fetchCustomer(pattern);
+                    return response;
                   },
                   itemBuilder: (context, suggestion) {
+                    var name = getName(suggestion);
                     return ListTile(
-                      title: Text(suggestion.toString()),
+                      title: Text(name),
                     );
                   },
                   onSuggestionSelected: (suggestion) {
-                    _customerController.text = suggestion.toString();
+                    var id = getId(suggestion);
+                    _selectedCustomerId = id;
+                    _customerController.text = getName(suggestion);
                   },
                  validator: (value) {
                    if (value!.isEmpty) {
@@ -72,9 +92,10 @@ void AttributionModal(int index, slots, computer, context) async {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
-                      Scaffold.of(context).showSnackBar(SnackBar(
-                          content: Text('Your Favorite City is ${_selectedCustomerId}')
-                      ));
+
+                     AttributionAPIProvider().createAttribution(date.toString(), hour.toString(), computer.id.toString(), _selectedCustomerId.toString(), context);
+                     Navigator.of(context).pop();
+
                     }
                   },
                 )

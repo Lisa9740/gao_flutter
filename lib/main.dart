@@ -5,7 +5,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:gao_flutter/view/home.dart';
 
 Future main() async {
-  await dotenv.load();
   runApp(const MyApp());
 }
 

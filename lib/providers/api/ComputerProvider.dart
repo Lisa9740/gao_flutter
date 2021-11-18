@@ -1,14 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gao_flutter/models/computer.dart';
+import 'package:gao_flutter/providers/api/api.conf.dart';
 import 'package:gao_flutter/utils/snackbar.notif.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-final String apiUrl = dotenv.env['API_URL'].toString();
 
 
-class ComputerAPIProvider {
+
+class ComputerAPIProvider extends ApiConf {
 
   //Fetch a user with the username supplied in the form input
   Future<List<Computer>> fetchComputer(date, page) async {
@@ -16,6 +15,8 @@ class ComputerAPIProvider {
     if (response.statusCode == 200) {
       List<Computer> computers = <Computer>[];
       var computerList = json.decode(response.body);
+
+      print(response.body);
 
      // computerList.map((data) => computers.add(Computer.fromJson(data)));
      computerList.forEach((data) async {

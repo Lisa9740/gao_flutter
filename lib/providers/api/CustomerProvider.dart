@@ -1,12 +1,11 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'package:gao_flutter/models/customer.dart';
+import 'package:gao_flutter/providers/api/api.conf.dart';
 import 'package:http/http.dart' as http;
 
-final String apiUrl = dotenv.env['API_URL'].toString();
-
-class CustomerAPIProvider {
+class CustomerAPIProvider extends ApiConf{
 
   //Fetch a user with the username supplied in the form input
   Future<List<Customer>> fetchCustomer(name) async {
@@ -27,4 +26,5 @@ class CustomerAPIProvider {
       throw Exception('Failed to load customers');
     }
   }
+
 }

@@ -13,8 +13,12 @@ class Customer {
     return Customer(id: json['id'], firstname: json['firstname'], lastname: json['lastname']);
   }
 
+
+
   @override
-  String toString() {
-    return '$firstname $lastname';
+  toString() {
+    return '$id $firstname $lastname';
   }
+
+
 }
