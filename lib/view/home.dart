@@ -3,7 +3,11 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gao_flutter/models/computer.dart';
+import 'package:gao_flutter/providers/api/AuthProvider.dart';
 import 'package:gao_flutter/providers/api/ComputerProvider.dart';
+import 'package:gao_flutter/utils/shared_pref.dart';
+import 'package:gao_flutter/utils/snackbar.notif.dart';
+import 'package:gao_flutter/view/login.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import 'components/computer.dart';
@@ -70,6 +74,15 @@ class _HomePageState extends State<HomePage> {
     return Text("0 / 10");
   }
 
+  logout(){
+    sharedPref().remove('token');
+    SendNotificationSnackBar('Vous êtes maintenant connecté', context);
+    return  Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (BuildContext context) => const LoginPage()),
+            (Route<dynamic> route) => false);
+  }
+
   @override
   Widget build(BuildContext context){
     return Scaffold(
@@ -91,6 +104,17 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(
                   height: 20,
                 ),
+               Row(
+                 children: [
+                   const SizedBox(
+                     width: 300,
+                   ),
+                   RaisedButton(
+                     onPressed: () => logout(),
+                     child: Icon(Icons.logout),
+                   ),
+                 ],
+               ),
                 Container(
                   height: 30.0,
                   child: Text(formatDate(currentDate, [dd, '/', mm, '/', yyyy])),

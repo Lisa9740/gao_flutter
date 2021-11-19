@@ -6,23 +6,17 @@ import 'package:gao_flutter/utils/snackbar.notif.dart';
 import 'package:http/http.dart' as http;
 
 
-
 class ComputerAPIProvider extends ApiConf {
 
-  //Fetch a user with the username supplied in the form input
   Future<List<Computer>> fetchComputer(date, page) async {
     final response = await http.get(Uri.parse(apiUrl + 'computers?date='+ date.toString() +'&page=' + page.toString()), headers: {});
     if (response.statusCode == 200) {
       List<Computer> computers = <Computer>[];
       var computerList = json.decode(response.body);
 
-      print(response.body);
-
-     // computerList.map((data) => computers.add(Computer.fromJson(data)));
      computerList.forEach((data) async {
         computers.add(Computer.fromJson(data));
       });
-
       return computers;
     } else {
       throw Exception('Failed to load computers');
@@ -37,7 +31,6 @@ class ComputerAPIProvider extends ApiConf {
 
   createComputer(name, context) async{
     final response =  await http.post(Uri.parse(apiUrl + 'computer/create'), body: {'name': name});
-
     if (response.statusCode != 200){
       return SendNotificationSnackBar('Une erreur est survenue', context);
     }
