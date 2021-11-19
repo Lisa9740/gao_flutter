@@ -61,17 +61,17 @@ void showForm(int? id, _computers, refreshData,  context ) async {
 }
 
 // Insert a new journal to the database
-Future<void> _addItem(_refreshData, context) async {
+Future<void> _addItem(refreshData, context) async {
   /*  await Computers.createComputer(
         _nameController.text);*/
   await ComputerAPIProvider().createComputer(_nameController.text, context);
-  _refreshData();
+  refreshData();
 }
 
 // Update an existing journal
-Future<void> _updateComputer(id, _refreshData, context) async {
+Future<void> _updateComputer(id, refreshData, context) async {
   await ComputerAPIProvider().updateComputer(id, _nameController.text, context);
   /* await Computers.updateComputer(
         id, _nameController.text);*/
-  _refreshData();
+  refreshData();
 }

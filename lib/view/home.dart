@@ -47,6 +47,7 @@ class _HomePageState extends State<HomePage> {
         firstDate: DateTime(2015),
         lastDate: DateTime(2050));
     if (pickedDate != null && pickedDate != currentDate) {
+      _refreshData();
       setState(() {
         currentDate = pickedDate;
       });
@@ -54,8 +55,8 @@ class _HomePageState extends State<HomePage> {
   }
   // Delete an item
   void _deleteItem(int id, computer) async {
-    RemoveComputerModal(id, computer, context);
-    _refreshData();
+    RemoveComputerModal(id, computer, _refreshData, context);
+;
   }
 
   @override
@@ -132,7 +133,7 @@ class _HomePageState extends State<HomePage> {
 
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
-        onPressed: () => showForm(null, null, null, null),
+        onPressed: () => showForm(null, _computers, _refreshData, context),
       ),
     );
   }
