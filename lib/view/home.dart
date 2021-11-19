@@ -19,17 +19,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Computer> _computers = [];
-
+  int currentPage = 1;
+  String _totalPageSize = "0";
   DateTime currentDate = DateTime.now();
 
   bool _isLoading = true;
   // This function is used to fetch all data from the database
   void _refreshData() async {
-    final computer = await ComputerAPIProvider().fetchComputer(currentDate, 1);
-    print(computer);
+    var pageSize = await ComputerAPIProvider().fetchPageSize();
+    final computer = await ComputerAPIProvider().fetchComputer(currentDate, currentPage);
     setState(() {
       _computers = computer;
       _isLoading = false;
+      _totalPageSize = pageSize.toString();
     });
   }
 
@@ -57,6 +59,15 @@ class _HomePageState extends State<HomePage> {
   void _deleteItem(int id, computer) async {
     RemoveComputerModal(id, computer, _refreshData, context);
 ;
+  }
+
+  totalAttributionNumber(computer){
+    if (computer.attributions.length > 0){
+      if (computer.attributions[0].length > 0){
+        return Text(computer.attributions[0].length.toString() + " / 10");
+      }
+    }
+    return Text("0 / 10");
   }
 
   @override
@@ -90,8 +101,41 @@ class _HomePageState extends State<HomePage> {
                     child: Text('Selectionner une date'),
                   ),
                 ),
-                Container(
-                  height: 500.0,
+                const SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  children: [
+                    const SizedBox(
+                      width: 80,
+                    ),
+                    ElevatedButton(onPressed: () async {
+                      if (currentPage != 1){
+                        setState(() {
+                          currentPage = currentPage - 1;
+                        });
+                        _refreshData();
+                      }
+                    }, child: Icon(Icons.arrow_back_ios)),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    Text('Page ' + currentPage.toString() + '/' + _totalPageSize),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    ElevatedButton(onPressed: () async {
+                      setState(() {
+                        currentPage = currentPage + 1;
+                      });
+                      _refreshData();
+
+                    },  child: Icon(Icons.arrow_forward_ios)),
+                  ],
+                ),
+                Expanded(
+                  child: Container(
+                  height: 450.0,
                   child: ListView.builder(
                     itemCount: _computers.length,
                     itemBuilder: (context, int index) {
@@ -99,9 +143,13 @@ class _HomePageState extends State<HomePage> {
                           title: ListTile(
                               title: Text(_computers[index].name.toString()),
                               trailing: SizedBox(
-                                width: 100,
+                                width: 160,
                                 child: Row(
                                   children: [
+                                    totalAttributionNumber(_computers[index]),
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
                                     IconButton(
                                       icon: const Icon(Icons.edit),
                                       onPressed: () => showForm(_computers[index].id, _computers, _refreshData, context),
@@ -109,8 +157,7 @@ class _HomePageState extends State<HomePage> {
                                     IconButton(
                                       icon: const Icon(Icons.delete),
                                       onPressed: () =>
-                                          _deleteItem(
-                                              _computers[index].id,   _computers[index]),
+                                          _deleteItem(_computers[index].id,   _computers[index]),
                                     ),
                                   ],
                                 ),
@@ -121,13 +168,17 @@ class _HomePageState extends State<HomePage> {
                               thickness: 1.0,
                               height: 1.0,
                             ),
-                            computer(context, index, currentDate, _computers[index], _refreshData)
+                          computer(context, index, currentDate, _computers[index], _refreshData)
+
+
                           ]
                       );
                     },
                   ),
+                  )
                 )
               ]
+
           )
       ),
 

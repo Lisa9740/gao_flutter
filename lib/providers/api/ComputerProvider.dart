@@ -29,6 +29,12 @@ class ComputerAPIProvider extends ApiConf {
     }
   }
 
+  fetchPageSize() async {
+    final response = await http.get(Uri.parse(apiUrl + 'computers/size'), headers: {});
+    print(response.body);
+    return response.body.toString();
+  }
+
   createComputer(name, context) async{
     final response =  await http.post(Uri.parse(apiUrl + 'computer/create'), body: {'name': name});
 
