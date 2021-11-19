@@ -1,3 +1,3 @@
-class ApiConf {
-  final apiUrl = "http://gao-nodejs.barret-alison-dev.xyz/api/" ;
+class ApiConf{
+  final String apiUrl = "http://gao-nodejs.barret-alison-dev.xyz/api/";
 }

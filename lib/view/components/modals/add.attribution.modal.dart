@@ -3,27 +3,24 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:gao_flutter/models/customer.dart';
 import 'package:gao_flutter/providers/api/AttributionProvider.dart';
 import 'package:gao_flutter/providers/api/CustomerProvider.dart';
+import 'package:gao_flutter/utils/format.data.dart';
+import 'package:gao_flutter/view/components/modals/add.customer.modal.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-void AttributionModal(int hour, slots, computer, date, context) async {
+
+void AddAttributionModal(int hour, slots, computer, date, refreshData, context) async {
   var _selectedCustomerId = null;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _customerController = TextEditingController();
 
-  formatDataToArray(str){
-    var formattedStr = str.toString();
-    return formattedStr.split(' ').map((String test) => test).toList();
-  }
-
   getId(data){
-    return formatDataToArray(data)[0];
+    return FormatData.toArray(data)[0];
   }
 
   getName(data){
-    var name = formatDataToArray(data);
+    var name = FormatData.toArray(data);
     return name[1] + ' ' + name[2];
   }
 
@@ -48,7 +45,8 @@ void AttributionModal(int hour, slots, computer, date, context) async {
               const SizedBox(
                 height: 30,
               ),
-
+              ElevatedButton(   child: const Icon(Icons.add),
+                onPressed: () => AddCustomerModal(hour, slots, computer, date, context)),
               Form(
                 key: _formKey,
                 child: TypeAheadFormField(
@@ -93,9 +91,9 @@ void AttributionModal(int hour, slots, computer, date, context) async {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
 
-                     AttributionAPIProvider().createAttribution(date.toString(), hour.toString(), computer.id.toString(), _selectedCustomerId.toString(), context);
+                     AttributionAPIProvider().createAttribution(date.toString(), hour.toString(), computer.id.toString(), _selectedCustomerId, null, null, context);
+                     refreshData();
                      Navigator.of(context).pop();
-
                     }
                   },
                 )

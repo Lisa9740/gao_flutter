@@ -7,6 +7,8 @@ import 'package:gao_flutter/providers/api/ComputerProvider.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import 'components/computer.dart';
+import 'components/modals/computer.modal.dart';
+import 'components/modals/remove.computer.modal.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -17,13 +19,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Computer> _computers = [];
-  final TextEditingController _nameController = TextEditingController();
+
   DateTime currentDate = DateTime.now();
 
   bool _isLoading = true;
   // This function is used to fetch all data from the database
-  void _refreshJournals() async {
-    //final data = await Computers.getComputers();
+  void _refreshData() async {
     final computer = await ComputerAPIProvider().fetchComputer(currentDate, 1);
     print(computer);
     setState(() {
@@ -35,83 +36,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState()  {
     super.initState();
-    _refreshJournals(); // Loading the diary when the app starts
-  }
-
-
-  // This function will be triggered when the floating button is pressed
-  // It will also be triggered when you want to update an item
-  void _showForm(int? id) async {
-    if (id != null) {
-      // id == null -> create new item
-      // id != null -> update an existing item
-      final existingComputer =
-      _computers.firstWhere((element) => element.id == id);
-      _nameController.text = existingComputer.name;
-    }
-
-    showMaterialModalBottomSheet(
-        context: context,
-        elevation: 5,
-        expand: true,
-        builder: (_) => Container(
-          padding: const EdgeInsets.all(15),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                const SizedBox(
-                  height: 50,
-                ),
-                TextField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(hintText: 'Nom'),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    // Save new journal
-                    if (id == null) {
-                      await _addItem();
-                    }
-
-                    if (id != null) {
-                      await _updateComputer(id.toString());
-                    }
-
-                    // Clear the text fields
-                    _nameController.text = '';
-
-                    // Close the bottom sheet
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(id == null ? 'Ajouter nouveau poste' : 'Editer'),
-                )
-              ],
-            ),
-          ),
-        )
-    );
-  }
-
-// Insert a new journal to the database
-  Future<void> _addItem() async {
-
-    /*  await Computers.createComputer(
-        _nameController.text);*/
-    await ComputerAPIProvider().createComputer(_nameController.text, context);
-    _refreshJournals();
-  }
-
-  // Update an existing journal
-  Future<void> _updateComputer(id) async {
-    await ComputerAPIProvider().updateComputer(id, _nameController.text, context);
-    /* await Computers.updateComputer(
-        id, _nameController.text);*/
-    _refreshJournals();
+    _refreshData(); // Loading the diary when the app starts
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -128,10 +53,9 @@ class _HomePageState extends State<HomePage> {
     }
   }
   // Delete an item
-  void _deleteItem(int id) async {
-    await ComputerAPIProvider().deleteComputer(id, context);
-    //await Computers.deleteComputer(id);
-    _refreshJournals();
+  void _deleteItem(int id, computer) async {
+    RemoveComputerModal(id, computer, context);
+    _refreshData();
   }
 
   @override
@@ -179,14 +103,13 @@ class _HomePageState extends State<HomePage> {
                                   children: [
                                     IconButton(
                                       icon: const Icon(Icons.edit),
-                                      onPressed: () => _showForm(
-                                          _computers[index].id),
+                                      onPressed: () => showForm(_computers[index].id, _computers, _refreshData, context),
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.delete),
                                       onPressed: () =>
                                           _deleteItem(
-                                              _computers[index].id),
+                                              _computers[index].id,   _computers[index]),
                                     ),
                                   ],
                                 ),
@@ -197,7 +120,7 @@ class _HomePageState extends State<HomePage> {
                               thickness: 1.0,
                               height: 1.0,
                             ),
-                            computer(context, index, currentDate, _computers[index])
+                            computer(context, index, currentDate, _computers[index], _refreshData)
                           ]
                       );
                     },
@@ -209,7 +132,7 @@ class _HomePageState extends State<HomePage> {
 
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
-        onPressed: () => _showForm(null),
+        onPressed: () => showForm(null, null, null, null),
       ),
     );
   }
