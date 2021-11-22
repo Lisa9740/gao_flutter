@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:gao_flutter/models/computer.dart';
 import 'package:gao_flutter/providers/api/api.conf.dart';
 import 'package:gao_flutter/utils/snackbar.notif.dart';
@@ -10,12 +9,14 @@ class ComputerAPIProvider extends ApiConf {
 
   Future<List<Computer>> fetchComputer(date, page) async {
     final response = await http.get(Uri.parse(apiUrl + 'computers?date='+ date.toString() +'&page=' + page.toString()), headers: {});
+    var jsonResponse = json.decode(response.body);
+
     if (response.statusCode == 200) {
       List<Computer> computers = <Computer>[];
-      var computerList = json.decode(response.body);
 
-     computerList.forEach((data) async {
-        computers.add(Computer.fromJson(data));
+     jsonResponse.forEach((data) async {
+        await syncApiToLocalDatabase(data);
+        //computers.add(Computer.fromJson(data));
       });
       return computers;
     } else {

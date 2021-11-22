@@ -15,28 +15,31 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   var errorMsg;
-  final ButtonStyle style = ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 14), primary: const Color(0xffA03E99));
+  final ButtonStyle style = ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 14));
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  signIn(String email, String password) async {
-    var loginStatus = await AuthAPIProvider().login(email, password);
 
-    if (loginStatus) {
+  renderPage(Widget page) {
+    var view = page;
+    return Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (BuildContext context) => view),
+            (Route<dynamic> route) => false);
+  }
+
+  signIn(String email, String password) async {
+    var login = await AuthAPIProvider().login(email, password);
+
+    if (login) {
       var token = sharedPref().read("token");
       if (token != null) {
         SendNotificationSnackBar('Authentification réussi !', context);
-        return Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-                builder: (BuildContext context) => const HomePage()),
-                (Route<dynamic> route) => false);
+        return renderPage(HomePage());
       }
     }
-    SendNotificationSnackBar('Votre identifiant est invalide', context);
-    return Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-            builder: (BuildContext context) => const LoginPage()),
-            (Route<dynamic> route) => false);
+    SendNotificationSnackBar('Votre identifiant est invalide.', context);
+    return renderPage(LoginPage());
   }
 
 
@@ -47,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
         //margin: const EdgeInsets.only(
         //left: 10, top: 50, right: 10, bottom: 0),
         _isLoading
-            ? const Center(child: CircularProgressIndicator(color: Color(0xffA03E99),))
+            ? const Center(child: CircularProgressIndicator())
             :  ListView(
           padding: const EdgeInsets.all(16.0),
           children: <Widget>[
@@ -104,16 +107,7 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(
               height: 20,
             ),
-            const Center(
-              child: Text(
-                'Mot de passe oublié ?',
-                style: TextStyle(
-                  color: Color(0xffA03E99),
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+
           ],
 
 

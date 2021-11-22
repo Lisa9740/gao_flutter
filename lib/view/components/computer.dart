@@ -34,12 +34,15 @@ Widget computer(BuildContext context, index,date,  _computer, refreshData) {
     var customerName = "";
     var Attributions = _computer.attributions;
     if (Attributions.length != 0) {
-        Attributions[0].forEach((attr) =>{
+        Attributions[0].forEach((attr) =>
+        {
           if (attr['hour'] == hour){
             attribution = attr,
-            customerName = attr['Customer']['firstname'] + " " + attr['Customer']['lastname']
+            customerName = attr['Customer']['firstname'] + " " +
+                attr['Customer']['lastname']
           }
         });
+
     }
     return Row(
         children: [

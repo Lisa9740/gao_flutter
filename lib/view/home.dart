@@ -1,4 +1,4 @@
-
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +9,7 @@ import 'package:gao_flutter/utils/shared_pref.dart';
 import 'package:gao_flutter/utils/snackbar.notif.dart';
 import 'package:gao_flutter/view/login.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-
+import 'package:gao_flutter/controllers/computers.controller.dart';
 import 'components/computer.dart';
 import 'components/modals/computer.modal.dart';
 import 'components/modals/remove.computer.modal.dart';
@@ -23,15 +23,20 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Computer> _computers = [];
+
   int currentPage = 1;
   String _totalPageSize = "0";
   DateTime currentDate = DateTime.now();
 
   bool _isLoading = true;
+  var subscription = null;
+
   // This function is used to fetch all data from the database
   void _refreshData() async {
     var pageSize = await ComputerAPIProvider().fetchPageSize();
-    final computer = await ComputerAPIProvider().fetchComputer(currentDate, currentPage);
+    final computer = await Computers().getComputers(currentDate, currentPage);
+
+    print(computer);
     setState(() {
       _computers = computer;
       _isLoading = false;
@@ -42,7 +47,16 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState()  {
     super.initState();
+    subscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+                  print(result);
+    });
     _refreshData(); // Loading the diary when the app starts
+  }
+
+  @override
+  dispose() {
+    super.dispose();
+    subscription.cancel();
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -62,10 +76,10 @@ class _HomePageState extends State<HomePage> {
   // Delete an item
   void _deleteItem(int id, computer) async {
     RemoveComputerModal(id, computer, _refreshData, context);
-;
   }
 
   totalAttributionNumber(computer){
+    print(computer);
     if (computer.attributions.length > 0){
       if (computer.attributions[0].length > 0){
         return Text(computer.attributions[0].length.toString() + " / 10");
@@ -76,7 +90,7 @@ class _HomePageState extends State<HomePage> {
 
   logout(){
     sharedPref().remove('token');
-    SendNotificationSnackBar('Vous êtes maintenant connecté', context);
+    SendNotificationSnackBar('Vous êtes maintenant déconnecté', context);
     return  Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
             builder: (BuildContext context) => const LoginPage()),
@@ -109,9 +123,9 @@ class _HomePageState extends State<HomePage> {
                    const SizedBox(
                      width: 300,
                    ),
-                   RaisedButton(
+                   IconButton(
                      onPressed: () => logout(),
-                     child: Icon(Icons.logout),
+                     icon: Icon(Icons.logout),
                    ),
                  ],
                ),
@@ -192,9 +206,7 @@ class _HomePageState extends State<HomePage> {
                               thickness: 1.0,
                               height: 1.0,
                             ),
-                          computer(context, index, currentDate, _computers[index], _refreshData)
-
-
+                            computer(context, index, currentDate, _computers[index], _refreshData)
                           ]
                       );
                     },

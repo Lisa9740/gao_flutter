@@ -1,8 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:gao_flutter/database/sql_helper.dart';
+import 'package:gao_flutter/models/attribution.dart';
+import 'package:gao_flutter/models/attribution.dart';
+import 'package:gao_flutter/models/attribution.dart';
+import 'package:gao_flutter/models/attribution.dart';
 import 'package:sqflite/sqflite.dart' as sql;
+import 'package:intl/intl.dart';
+
+import 'customer.controller.dart';
+
 
 class Attributions extends SQLHelper{
+
   static Future<int> createAttribution(int hour, int computerId, int customerId, String firstname, String lastname) async {
     final db = await SQLHelper.db();
     final data = {'date': null, 'hour': hour, 'computerId': computerId, 'customerId': customerId};
@@ -11,21 +20,40 @@ class Attributions extends SQLHelper{
     return attr;
   }
 
-  // Read all items (journals)
-  static Future<List<Map<String, dynamic>>> getAttributions() async {
+  Future<List> getComputerAttributions(computerId, date) async {
     final db = await SQLHelper.db();
-    return db.query('attribution', orderBy: "id");
+    var attribution = [];
+    date = DateFormat('yyyy-MM-dd').format(date);
+
+    attribution = (await db.rawQuery("SELECT * FROM attribution WHERE computerId = " + computerId.toString() + " AND date = '" +  date.toString()  + "';")).cast<Attribution>();
+    attribution = await formatData(attribution);
+    return attribution;
+  }
+
+  Future<List> formatData(attributions) async {
+    var customer;
+    var data;
+    List formattedData = [];
+    print({"attr data", attributions});
+
+    attributions.forEach((element) async{
+      customer = await Customers.get(element['customerId']);
+      data = { "id" : element["id"], "hour" : element['hour'], "date" : element['date'], "computerId" : element['computerId'], "Customer" : customer};
+      print({"attr data", data});
+
+      formattedData.add(data);
+    });
+
+    print({"attr formateed data", formattedData});
+    return formattedData;
   }
 
 
-  // Read a single item by id
-  // The app doesn't use this method but I put here in case you want to see it
   static Future<List<Map<String, dynamic>>> getAttribution(int id) async {
     final db = await SQLHelper.db();
     return db.query('attribution', where: "id = ?", whereArgs: [id], limit: 1);
   }
 
-  // Delete
   static Future<void> deleteAttribution(int id) async {
     final db = await SQLHelper.db();
     try {

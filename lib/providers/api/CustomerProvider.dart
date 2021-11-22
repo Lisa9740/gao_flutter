@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 
 class CustomerAPIProvider extends ApiConf{
 
-
   Future<List<Customer>> fetchCustomer(name) async {
     final response = await http.get(
         Uri.parse(apiUrl + 'customer/search?query=' + name.toString()),
