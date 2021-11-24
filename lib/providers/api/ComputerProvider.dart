@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:gao_flutter/database/local.database.dart';
 import 'package:gao_flutter/models/computer.dart';
 import 'package:gao_flutter/providers/api/api.conf.dart';
 import 'package:gao_flutter/utils/snackbar.notif.dart';
@@ -13,10 +14,9 @@ class ComputerAPIProvider extends ApiConf {
 
     if (response.statusCode == 200) {
       List<Computer> computers = <Computer>[];
-
-     jsonResponse.forEach((data) async {
-        await syncApiToLocalDatabase(data);
-        //computers.add(Computer.fromJson(data));
+      jsonResponse.forEach((data) async {
+       // LocalDatabase.sync(data);
+        computers.add(Computer.fromJson(data));
       });
       return computers;
     } else {

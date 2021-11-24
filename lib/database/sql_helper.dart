@@ -47,12 +47,6 @@ class SQLHelper {
 
   }
 
-  static Future<void> syncDatabase() async{
-    final database = await db();
-    await cleanDatabase(database);
-    await createTables(database);
-  }
-
   static Future<sql.Database> db() async {
     return sql.openDatabase(
       'gao.db',

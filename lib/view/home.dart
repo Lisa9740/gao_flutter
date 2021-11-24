@@ -3,12 +3,10 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gao_flutter/models/computer.dart';
-import 'package:gao_flutter/providers/api/AuthProvider.dart';
 import 'package:gao_flutter/providers/api/ComputerProvider.dart';
 import 'package:gao_flutter/utils/shared_pref.dart';
 import 'package:gao_flutter/utils/snackbar.notif.dart';
 import 'package:gao_flutter/view/login.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:gao_flutter/controllers/computers.controller.dart';
 import 'components/computer.dart';
 import 'components/modals/computer.modal.dart';
@@ -34,9 +32,9 @@ class _HomePageState extends State<HomePage> {
   // This function is used to fetch all data from the database
   void _refreshData() async {
     var pageSize = await ComputerAPIProvider().fetchPageSize();
-    final computer = await Computers().getComputers(currentDate, currentPage);
+    final computer = await ComputerAPIProvider().fetchComputer(currentDate, currentPage);
 
-    print(computer);
+    print({"computers", computer});
     setState(() {
       _computers = computer;
       _isLoading = false;
@@ -79,7 +77,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   totalAttributionNumber(computer){
-    print(computer);
+    print({"totalAttributionNumber computer", computer});
     if (computer.attributions.length > 0){
       if (computer.attributions[0].length > 0){
         return Text(computer.attributions[0].length.toString() + " / 10");

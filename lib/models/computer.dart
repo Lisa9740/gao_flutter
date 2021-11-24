@@ -13,7 +13,6 @@ class Computer {
     required this.attributions
   });
 
-
   //creating a dart user object from the json object
   factory Computer.fromJson(Map<String, dynamic> json) {
     return Computer(id: json['id'], name: json['name'], attributions: json['Attributions']);

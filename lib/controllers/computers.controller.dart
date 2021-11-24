@@ -17,16 +17,6 @@ class Computers extends SQLHelper {
     return id;
   }
 
-  // Get all computers
-  Future<List<Computer>> getComputers(date, page) async {
-    final db = await SQLHelper.db();
-    var computers;
-    await ComputerAPIProvider().fetchComputer(date, page);
-    computers =  await db.query('computer', orderBy: "id");
-    var tcomputers = await formatComputerData(computers, date);
-    print({"getComputers", tcomputers});
-    return tcomputers;
-   }
 
   // Update an item by id
   static Future<int> updateComputer(
@@ -52,20 +42,5 @@ class Computers extends SQLHelper {
     }
   }
 
-  Future<List<Computer>> formatComputerData(computers, date) async {
-    List<Computer> formattedData = <Computer>[];
-
-    print({"formatteed" ,  computers});
-    var attributions;
-    var data;
-
-    computers.forEach((element) async{
-      //attributions = await Attributions().getComputerAttributions(element["id"], date);
-      attributions = [];
-      data = { "id" : element["id"], "name" : element['name'], "Attributions" : attributions};
-      formattedData.add(Computer.fromJson(data));
-    });
-    return formattedData;
-  }
 
 }

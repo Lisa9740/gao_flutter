@@ -2,8 +2,9 @@ import 'package:gao_flutter/models/customer.dart';
 
 
 class Attribution {
+  var customer;
 
-  const Attribution({
+  Attribution({
     required this.id,
     required this.hour,
     required this.date,
@@ -13,9 +14,16 @@ class Attribution {
   final int id;
   final int hour;
   final String date;
-  final Customer customer;
 
- /* @override
+
+  //creating a dart user object from the json object
+  factory Attribution.fromJson(Map<String, dynamic> json) {
+    return Attribution( id: json["id"], hour : json['hour'], date : json['date'], customer : json['Customer']);
+  }
+
+
+/* @override
+
   String toString() {
     return '$firstname $lastname';
   }*/
