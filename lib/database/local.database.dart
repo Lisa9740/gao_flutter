@@ -1,19 +1,23 @@
+import 'package:gao_flutter/controllers/attribution.controller.dart';
+import 'package:gao_flutter/controllers/customer.controller.dart';
 import 'package:gao_flutter/database/sql_helper.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 
-class LocalDatabase extends SQLHelper{
+class LocalDatabase{
 
   static sync(data) async {
     final db = await SQLHelper.db();
-     syncComputers(db, data);
+    print("SYNCING TO LOCALDATABASE...");
+    await syncComputers(db, data);
   }
 
   static syncComputers(db, data) async{
-    var computer = {"id": data['id'], "name": data['name']};
-    var attribution = data['Attributions'];
+    print({"sync computer data", data});
+    var computer = {"id": data.id, "name": data.name};
+    var attribution = data.attributions;
 
     if (attribution.length > 0 ){
-      await syncAttributions(db, attribution, data["id"]);
+      await syncAttributions(db, attribution, data.id);
     }
     await db.insert("computer", computer,
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
@@ -21,16 +25,18 @@ class LocalDatabase extends SQLHelper{
   }
 
   static syncCustomers(db, data) async{
+    print({"sync customer data", data});
     var customer = {"id" : data['id'], "firstname" : data['firstname'],  "lastname" : data['lastname'] };
-    await db.insert("customer", customer, conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    await Customers.create(db, customer);
   }
 
   static syncAttributions(db, datas, computerId) async{
+    print({"sync attribution data", datas});
     var attribution;
     datas[0].forEach((data) async {
       await syncCustomers(db, data['Customer']);
       attribution = { "id" : data['id'], "hour": data['hour'], "date" : data['date'], "customerId": data['Customer']['id'], "computerId": computerId};
-      await db.insert("attribution", attribution, conflictAlgorithm: sql.ConflictAlgorithm.replace);
+      await Attributions.createAttribution(db, attribution);
     });
     return;
   }

@@ -32,7 +32,10 @@ class _HomePageState extends State<HomePage> {
   // This function is used to fetch all data from the database
   void _refreshData() async {
     var pageSize = await ComputerAPIProvider().fetchPageSize();
-    final computer = await ComputerAPIProvider().fetchComputer(currentDate, currentPage);
+//    final computer = await ComputerAPIProvider().fetchComputer(currentDate, currentPage);
+    final computer = await Computers.getComputers(currentDate, currentPage);
+
+   // await Computers.getComputers(currentDate, currentPage);
 
     print({"computers", computer});
     setState(() {

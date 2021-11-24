@@ -5,6 +5,7 @@ import 'package:gao_flutter/providers/api/ComputerProvider.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:gao_flutter/models/computer.dart';
 import 'dart:convert';
+import 'package:intl/intl.dart';
 
 
 class Computers extends SQLHelper {
@@ -15,6 +16,42 @@ class Computers extends SQLHelper {
     final id = await db.insert('computer', data,
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
     return id;
+  }
+
+  // Get all computers
+  static Future<List<Computer>> getComputers(date, page) async {
+    final computers;
+    var attributions;
+    final db = await SQLHelper.db();
+    await ComputerAPIProvider().fetchComputer(date, page);
+
+
+    //attributions = await Attributions.getComputerAttribution(db, computerId, date);
+    computers =  await db.query('computer', limit: 3, offset: 1);
+    print(computers);
+    return format(computers, date);
+  }
+
+  static getAttributionByComputerId(date, computerId) {
+    return Attributions.getComputerAttribution(computerId, date);
+  }
+
+  static Future<List<Computer>> format(computers, date) async {
+    List<Computer> formattedData = <Computer> [];
+    var newFormat;
+    var attr;
+    date = DateFormat('yyyy-MM-dd').format(date);
+
+    computers.forEach((computer)  async {
+      attr = getAttributionByComputerId(date, computer['id']);
+      if (attr != null){
+        newFormat = {"id": computer["id"], "name": computer["name"], "Attributions" : attr };
+      }
+      newFormat = {"id": computer["id"], "name": computer["name"], "Attributions" : []};
+      formattedData.add(Computer.fromJson(newFormat));
+    });
+    print({"format", formattedData});
+    return formattedData;
   }
 
 

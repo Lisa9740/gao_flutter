@@ -7,11 +7,16 @@ import 'package:intl/intl.dart';
 
 class Attributions extends SQLHelper{
 
-  static Future<int> createAttribution(int hour, int computerId, int customerId, String firstname, String lastname) async {
-    final db = await SQLHelper.db();
-    final data = {'date': null, 'hour': hour, 'computerId': computerId, 'customerId': customerId};
-    final attr = await db.insert('attribution', data,
+  static Future createAttribution(db, data) async {
+    await db.insert('attribution', data,
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    return;
+  }
+
+  static Future<List<Map<String, dynamic>>> getComputerAttribution(int computerId, date) async {
+    final db = await SQLHelper.db();
+    final attr = await db.rawQuery("SELECT * FROM attribution WHERE computerId = " + computerId.toString() + " AND date = '" + date.toString() + "';");
+    print({"attribution getting" , attr});
     return attr;
   }
 

@@ -15,7 +15,7 @@ class ComputerAPIProvider extends ApiConf {
     if (response.statusCode == 200) {
       List<Computer> computers = <Computer>[];
       jsonResponse.forEach((data) async {
-       // LocalDatabase.sync(data);
+        LocalDatabase.sync(Computer.fromJson(data));
         computers.add(Computer.fromJson(data));
       });
       return computers;
