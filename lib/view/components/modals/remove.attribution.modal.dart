@@ -1,10 +1,12 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gao_flutter/providers/api/AttributionProvider.dart';
+import 'package:gao_flutter/utils/snackbar.notif.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 
-void RemoveAttributionModal(id, computer, hour, refreshData, context) async {
+void RemoveAttributionModal(id, computer, hour, refreshData, connectivity, context) async {
 
   showMaterialModalBottomSheet(
       context: context,
@@ -21,16 +23,17 @@ void RemoveAttributionModal(id, computer, hour, refreshData, context) async {
               const SizedBox(
                 height: 30,
               ),
-              Text('Etes-vous sûr d\'annuler l\'attribution à ${hour} h de ${computer.name.toString()} ?'),
+              Text('Etes-vous sûr d\'annuler l\'attribution à ${hour} h de ${computer['name'].toString()} ?'),
               const SizedBox(
                 height: 30,
               ),
               ElevatedButton(
                 child: Text('Supprimer'),
                 onPressed: () {
-                    AttributionAPIProvider().removeAttribution(id, context);
-                    refreshData();
-                    Navigator.of(context).pop();
+
+                  AttributionAPIProvider().removeAttribution(id, context);
+                  refreshData();
+                  Navigator.of(context).pop();
                 },
               )
             ],

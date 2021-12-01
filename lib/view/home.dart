@@ -1,13 +1,13 @@
+import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gao_flutter/models/computer.dart';
-import 'package:gao_flutter/providers/api/ComputerProvider.dart';
+import 'package:flutter/services.dart';
 import 'package:gao_flutter/utils/shared_pref.dart';
 import 'package:gao_flutter/utils/snackbar.notif.dart';
 import 'package:gao_flutter/view/login.dart';
-import 'package:gao_flutter/controllers/computers.controller.dart';
+import 'package:gao_flutter/controllers/computer.controller.dart';
 import 'components/computer.dart';
 import 'components/modals/computer.modal.dart';
 import 'components/modals/remove.computer.modal.dart';
@@ -20,44 +20,68 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Computer> _computers = [];
+  ConnectivityResult _connectionStatus = ConnectivityResult.none;
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> subscription;
+
+  List _computers = [];
+  List _attributions = [];
 
   int currentPage = 1;
   String _totalPageSize = "0";
   DateTime currentDate = DateTime.now();
-
   bool _isLoading = true;
-  var subscription = null;
+
 
   // This function is used to fetch all data from the database
   void _refreshData() async {
-    var pageSize = await ComputerAPIProvider().fetchPageSize();
-//    final computer = await ComputerAPIProvider().fetchComputer(currentDate, currentPage);
-    final computer = await Computers.getComputers(currentDate, currentPage);
-
-   // await Computers.getComputers(currentDate, currentPage);
-
+    var pageSize = await sharedPref().read('computerSize');
+    final computer = await Computers.getComputers(_connectionStatus, currentDate, currentPage);
     print({"computers", computer});
     setState(() {
       _computers = computer;
       _isLoading = false;
-      _totalPageSize = pageSize.toString();
+      _totalPageSize = pageSize;
     });
   }
 
   @override
   void initState()  {
     super.initState();
-    subscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
-                  print(result);
-    });
-    _refreshData(); // Loading the diary when the app starts
+    subscription = Connectivity().onConnectivityChanged.listen(_updateConnectionStatus);
+    _refreshData();
   }
+
 
   @override
   dispose() {
     super.dispose();
     subscription.cancel();
+  }
+
+  Future<void> initConnectivity() async {
+    late ConnectivityResult result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+        print({'Couldn\'t check connectivity status',  e});
+      return;
+    }
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) {
+      return Future.value(null);
+    }
+
+    return _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() {
+      _connectionStatus = result;
+    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -75,16 +99,15 @@ class _HomePageState extends State<HomePage> {
     }
   }
   // Delete an item
-  void _deleteItem(int id, computer) async {
-    RemoveComputerModal(id, computer, _refreshData, context);
+  void _deleteItem(int id, computer, connectivity) async {
+    RemoveComputerModal(id, computer, _refreshData, connectivity, context);
   }
 
-  totalAttributionNumber(computer){
-    print({"totalAttributionNumber computer", computer});
-    if (computer.attributions.length > 0){
-      if (computer.attributions[0].length > 0){
-        return Text(computer.attributions[0].length.toString() + " / 10");
-      }
+
+  totalAttributionNumber(computer, date, attributions) async{
+    print({"totalAttributionNumber computer", attributions});
+    if (attributions.length > 0){
+        return Text(attributions.length.toString() + " / 10");
     }
     return Text("0 / 10");
   }
@@ -180,23 +203,23 @@ class _HomePageState extends State<HomePage> {
                     itemBuilder: (context, int index) {
                       return ExpansionTile(
                           title: ListTile(
-                              title: Text(_computers[index].name.toString()),
+                              title: Text(_computers[index]['name'].toString()),
                               trailing: SizedBox(
                                 width: 160,
                                 child: Row(
                                   children: [
-                                    totalAttributionNumber(_computers[index]),
+                                   // totalAttributionNumber(_computers[index], currentDate),
                                     const SizedBox(
                                       width: 20,
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.edit),
-                                      onPressed: () => showForm(_computers[index].id, _computers, _refreshData, context),
+                                      onPressed: () => showForm(_computers[index]['id'], _computers, _refreshData, _connectionStatus, context),
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.delete),
                                       onPressed: () =>
-                                          _deleteItem(_computers[index].id,   _computers[index]),
+                                          _deleteItem(_computers[index]['id'], _computers[index], _connectionStatus),
                                     ),
                                   ],
                                 ),
@@ -207,7 +230,7 @@ class _HomePageState extends State<HomePage> {
                               thickness: 1.0,
                               height: 1.0,
                             ),
-                            computer(context, index, currentDate, _computers[index], _refreshData)
+                            computer(context, index, currentDate, _computers[index], _attributions, _connectionStatus, _refreshData)
                           ]
                       );
                     },
@@ -215,13 +238,12 @@ class _HomePageState extends State<HomePage> {
                   )
                 )
               ]
-
           )
       ),
 
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
-        onPressed: () => showForm(null, _computers, _refreshData, context),
+        onPressed: () => showForm(null, _computers, _refreshData, _connectionStatus, context),
       ),
     );
   }

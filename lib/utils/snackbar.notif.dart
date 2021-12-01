@@ -5,3 +5,9 @@ SendNotificationSnackBar(message, context) async{
     content: Text(message),
   ));
 }
+
+SendOfflineNotificationSnackBar(context) async{
+  return  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text('Veuillez vous connectez à Internet afin d\'effectuer une modification.'),
+  ));
+}

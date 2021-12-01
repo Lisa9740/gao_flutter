@@ -7,12 +7,23 @@ import 'api.conf.dart';
 class AttributionAPIProvider extends ApiConf {
 
   createAttribution(date, hour, computerId, customerId, String? firstname, String? lastname, context) async{
-    var customerToCreate = { 'date': date, 'hour': hour, 'computerId': computerId,  'lastname' : lastname, 'firstname' : firstname};
-    var dataToSend =   { 'date': date, 'hour': hour, 'computerId': computerId, 'customerId': customerId };
+    var customerToCreate = {
+      'date': date,
+      'hour': hour,
+      'computerId': computerId,
+      'lastname' : lastname,
+      'firstname' : firstname};
+
+    var dataToSend =  {
+      'date': date,
+      'hour': hour,
+      'computerId': computerId,
+      'customerId': customerId };
 
     if (customerId == null){
         dataToSend = customerToCreate;
     }
+
     final response =  await http.post(Uri.parse(apiUrl + 'attribution/create'),
         body: dataToSend);
 

@@ -1,23 +1,23 @@
 import 'package:flutter/foundation.dart';
+import 'package:gao_flutter/controllers/customer.controller.dart';
+import 'package:gao_flutter/database/db.provider.dart';
 import 'package:gao_flutter/database/sql_helper.dart';
 import 'package:gao_flutter/models/attribution.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:intl/intl.dart';
 
 
-class Attributions extends SQLHelper{
-
+class Attributions{
   static Future createAttribution(db, data) async {
-    await db.insert('attribution', data,
-        conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    await DBProvider.instance.insert(data, 'attribution');
     return;
   }
 
-  static Future<List<Map<String, dynamic>>> getComputerAttribution(int computerId, date) async {
-    final db = await SQLHelper.db();
-    final attr = await db.rawQuery("SELECT * FROM attribution WHERE computerId = " + computerId.toString() + " AND date = '" + date.toString() + "';");
-    print({"attribution getting" , attr});
-    return attr;
+  static Future<List> getComputerAttribution(int computerId, date) async {
+    date = DateFormat('yyyy-MM-dd').format(date);
+    final attr = await DBProvider.instance.rawQuery("SELECT * FROM attribution WHERE computerId = " + computerId.toString() + " AND date = '" + date.toString() + "';");
+    if(attr.length > 0) return attr;
+    return [];
   }
 
   static Future<List<Map<String, dynamic>>> getAttribution(int id) async {
@@ -33,6 +33,4 @@ class Attributions extends SQLHelper{
       debugPrint("Something went wrong when deleting an item: $err");
     }
   }
-
-
 }

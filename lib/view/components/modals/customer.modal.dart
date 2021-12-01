@@ -1,14 +1,29 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gao_flutter/providers/api/AttributionProvider.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-import '../../home.dart';
-
-void AddCustomerModal(int hour, slots, computer, date, connectivity, context) async {
+void CustomerModal(int hour, computer, date, context) async {
+  var _selectedCustomerId = null;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _firstnameController = TextEditingController();
   TextEditingController _lastnameController = TextEditingController();
+
+  formatDataToArray(str){
+    var formattedStr = str.toString();
+    return formattedStr.split(' ').map((String test) => test).toList();
+  }
+
+  getId(data){
+    return formatDataToArray(data)[0];
+  }
+
+  getName(data){
+    var name = formatDataToArray(data);
+    return name[1] + ' ' + name[2];
+  }
+
+ // final slot = slots.firstWhere((element) => element == hour);
 
   showMaterialModalBottomSheet(
       context: context,
@@ -46,21 +61,8 @@ void AddCustomerModal(int hour, slots, computer, date, connectivity, context) as
               ElevatedButton(
                 child: Text('Ajouter attribution'),
                 onPressed: () {
-                    AttributionAPIProvider().createAttribution(
-                        date.toString(),
-                        hour.toString(),
-                        computer.id.toString(),
-                        null,
-                        _firstnameController.text,
-                        _lastnameController.text,
-                        context);
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (BuildContext context) => HomePage(),
-                      ),
-                          (route) => false,
-                    );
+                    AttributionAPIProvider().createAttribution(date.toString(), hour.toString(), computer.id.toString(), null, _firstnameController.text, _lastnameController.text,   context);
+                    Navigator.of(context).pop();
                 },
               )
             ],
