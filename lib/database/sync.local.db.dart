@@ -2,18 +2,31 @@ import 'package:gao_flutter/database/db.provider.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 
 class LocalDatabase{
+
+
+  static cleanDatabase() async*{
+     await deleteAllFromTable("computer");
+     await deleteAllFromTable("customer");
+     await deleteAllFromTable("attribution");
+  }
+
+
   static sync(data) async {
     print("SYNCING TO LOCALDATABASE...");
+    await cleanDatabase();
     await syncComputers(data);
+  }
+
+  static deleteAllFromTable(table) async {
+    await DBProvider.instance.deleteQuery("delete from "+ table);
   }
 
   static syncComputers(data) async{
     print({"sync computer data", data});
     var computer = {"id": data.id, "name": data.name};
     var attribution = data.attributions;
-    if (attribution.length > 0 ){
-      await syncAttributions(attribution, data.id);
-    }
+    if (attribution.length > 0 ) await syncAttributions(attribution, data.id);
+
     await DBProvider.instance.insert(computer, "computer");
     return;
   }
@@ -21,7 +34,6 @@ class LocalDatabase{
   static syncCustomers(data) async{
     print({"sync customer data", data});
     var customer = {"id" : data['id'], "firstname" : data['firstname'],  "lastname" : data['lastname'] };
-
     await DBProvider.instance.insert(customer, "customer");
   }
 

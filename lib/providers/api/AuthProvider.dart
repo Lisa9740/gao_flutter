@@ -1,7 +1,7 @@
 import 'dart:convert';
 
+import 'package:gao_flutter/conf/api.dart';
 import 'package:gao_flutter/utils/shared_pref.dart';
-import 'api.conf.dart';
 import 'package:http/http.dart' as http;
 
 

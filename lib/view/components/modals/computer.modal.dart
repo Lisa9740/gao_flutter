@@ -3,7 +3,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gao_flutter/controllers/computer.controller.dart';
+import 'package:gao_flutter/controllers/local/computer.controller.dart';
 import 'package:gao_flutter/providers/api/ComputerProvider.dart';
 import 'package:gao_flutter/utils/snackbar.notif.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -71,11 +71,11 @@ void showForm(int? id, _computers, refreshData, connectivity,  context ) async {
 // Insert a new journal to the database
 Future<void> _addItem(refreshData, context) async {
   await Computers.createComputer(_nameController.text, context);
-  refreshData();
+  return;
 }
 
 // Update an existing journal
 Future<void> _updateComputer(id, refreshData, context) async {
   await ComputerAPIProvider().updateComputer(id, _nameController.text, context);
-  refreshData();
+  return;
 }

@@ -4,10 +4,11 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gao_flutter/models/computer.dart';
 import 'package:gao_flutter/utils/shared_pref.dart';
 import 'package:gao_flutter/utils/snackbar.notif.dart';
 import 'package:gao_flutter/view/login.dart';
-import 'package:gao_flutter/controllers/computer.controller.dart';
+import 'package:gao_flutter/controllers/local/computer.controller.dart';
 import 'components/computer.dart';
 import 'components/modals/computer.modal.dart';
 import 'components/modals/remove.computer.modal.dart';
@@ -20,6 +21,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  StreamController<Computer> _streamController = StreamController();
   ConnectivityResult _connectionStatus = ConnectivityResult.none;
   final Connectivity _connectivity = Connectivity();
   late StreamSubscription<ConnectivityResult> subscription;
@@ -35,28 +38,29 @@ class _HomePageState extends State<HomePage> {
 
   // This function is used to fetch all data from the database
   void _refreshData() async {
-    var pageSize = await sharedPref().read('computerSize');
     final computer = await Computers.getComputers(_connectionStatus, currentDate, currentPage);
+    final pageSize = await sharedPref().read('computerSize');
     print({"computers", computer});
-    setState(() {
-      _computers = computer;
-      _isLoading = false;
-      _totalPageSize = pageSize;
-    });
+    if (!mounted) return;
+      setState(() {
+        _computers = computer;
+        _isLoading = false;
+        _totalPageSize = pageSize;
+      });
   }
+
 
   @override
   void initState()  {
     super.initState();
     subscription = Connectivity().onConnectivityChanged.listen(_updateConnectionStatus);
-    _refreshData();
   }
 
 
   @override
   dispose() {
     super.dispose();
-    subscription.cancel();
+   subscription.cancel();
   }
 
   Future<void> initConnectivity() async {
@@ -82,7 +86,9 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _connectionStatus = result;
     });
+    _refreshData();
   }
+
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
@@ -198,7 +204,7 @@ class _HomePageState extends State<HomePage> {
                 Expanded(
                   child: Container(
                   height: 450.0,
-                  child: ListView.builder(
+                 child: ListView.builder(
                     itemCount: _computers.length,
                     itemBuilder: (context, int index) {
                       return ExpansionTile(

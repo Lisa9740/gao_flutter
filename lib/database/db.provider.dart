@@ -91,6 +91,13 @@ class DBProvider {
     Database db = await instance.database;
     return await db.rawQuery(rawQuery);
   }
+
+  deleteQuery(rawQuery) async {
+    Database db = await instance.database;
+    var batch = db.batch();
+    await db.transaction((txn) async { batch.rawQuery(rawQuery);}
+    );
+  }
   // All of the methods (insert, query, update, delete) can also be done using
   // raw SQL commands. This method uses a raw query to give the row count.
   Future<int?> queryRowCount(table) async {
@@ -102,20 +109,22 @@ class DBProvider {
   // column values will be used to update the row.
   Future queryById(id, table) async {
     Database db = await instance.database;
-    return await db.query(table, where: 'id = ?', whereArgs: [id], limit: 1);
+    return await db.query(table, where: 'id = ?', whereArgs: [id]);
   }
   // We are assuming here that the id column in the map is set. The other
   // column values will be used to update the row.
-  Future<int> update(Map<String, dynamic> row, column, table, columns) async {
+  Future<int> update(Map<String, dynamic> row, column, table) async {
     Database db = await instance.database;
-    int id = row[columns[column]];
+    int id = row[column];
     return await db.update(table, row, where: '$column = ?', whereArgs: [id]);
   }
 
   // Deletes the row specified by the id. The number of affected rows is
   // returned. This should be 1 as long as the row exists.
-  Future<int> delete(int id, column, table) async {
+  Future<int> delete(int id, table) async {
     Database db = await instance.database;
-    return await db.delete(table, where: '$column = ?', whereArgs: [id]);
+    return await db.delete(table, where: 'id = ?', whereArgs: [id]);
   }
+
+
 }

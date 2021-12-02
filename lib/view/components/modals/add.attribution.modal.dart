@@ -87,11 +87,11 @@ void AddAttributionModal(int hour, slots, computer, date, refreshData, connectiv
                 ),
                 ElevatedButton(
                   child: Text('Ajouter attribution'),
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
                       if(connectivity != ConnectivityResult.none) {
-                        AttributionAPIProvider().createAttribution(
+                       await AttributionAPIProvider().createAttribution(
                             date.toString(),
                             hour.toString(),
                             computer['id'].toString(),
@@ -99,8 +99,8 @@ void AddAttributionModal(int hour, slots, computer, date, refreshData, connectiv
                             null,
                             null,
                             context);
-                        refreshData();
-                        Navigator.of(context).pop();
+                       refreshData();
+                       Navigator.of(context).pop();
                       }
                       SendOfflineNotificationSnackBar(context);
                       Navigator.of(context).pop();

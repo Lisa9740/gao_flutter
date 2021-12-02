@@ -11,3 +11,9 @@ SendOfflineNotificationSnackBar(context) async{
     content: Text('Veuillez vous connectez à Internet afin d\'effectuer une modification.'),
   ));
 }
+
+SendErrorNotificationSnackBar(context) async{
+  return  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text('Une erreur est survenue.'),
+  ));
+}

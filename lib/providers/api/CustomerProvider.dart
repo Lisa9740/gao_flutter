@@ -1,7 +1,7 @@
 import 'dart:convert';
 
+import 'package:gao_flutter/conf/api.dart';
 import 'package:gao_flutter/models/customer.dart';
-import 'package:gao_flutter/providers/api/api.conf.dart';
 import 'package:http/http.dart' as http;
 
 class CustomerAPIProvider extends ApiConf{

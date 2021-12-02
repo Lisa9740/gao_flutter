@@ -1,8 +1,8 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gao_flutter/controllers/attribution.controller.dart';
-import 'package:gao_flutter/controllers/customer.controller.dart';
+import 'package:gao_flutter/controllers/local/attribution.controller.dart';
+import 'package:gao_flutter/controllers/local/customer.controller.dart';
 import 'package:gao_flutter/utils/snackbar.notif.dart';
 import 'package:gao_flutter/view/components/modals/add.attribution.modal.dart';
 
@@ -52,7 +52,8 @@ Widget computer(BuildContext context, index,date,  _computer, _attributions, con
   }
 
   Future<List> getAttributions(_computer, date) async {
-    attributions = await Attributions.getComputerAttribution(_computer['id'], date);
+    attributions = await Attributions.getComputerAttribution(connectivity, _computer['id'], date);
+    print({"attributions", attributions});
     return attributions;
   }
 
@@ -75,7 +76,7 @@ Widget computer(BuildContext context, index,date,  _computer, _attributions, con
 
   getAttribution(attributions, hour, customers,  context)  {
     var attribution;
-    var customerName;
+    var customerName = "";
     if (attributions.length != 0) {
         attributions.forEach((attr) =>
         {
@@ -128,7 +129,10 @@ Widget computer(BuildContext context, index,date,  _computer, _attributions, con
                                            return FutureBuilder(
                                                future: getCustomer(snapshot.data),
                                                builder: (BuildContext context, AsyncSnapshot<dynamic> customer) {
-                                                   return getAttribution(snapshot.data, _hourSlots[index], customer.data, context);
+                                                    if (customer.hasData){
+                                                      return getAttribution(snapshot.data, _hourSlots[index], customer.data, context);
+                                                    }
+                                                    return CircularProgressIndicator();
                                                }
                                            );
                                           }
