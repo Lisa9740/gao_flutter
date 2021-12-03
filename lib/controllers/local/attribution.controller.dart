@@ -18,20 +18,4 @@ class Attributions{
     return [];
   }
 
-
-/*
-  static Future<List<Map<String, dynamic>>> getAttribution(int id) async {
-    final db = await SQLHelper.db();
-    return db.query('attribution', where: "id = ?", whereArgs: [id], limit: 1);
-  }
-*/
-
-/*  static Future<void> deleteAttribution(int id) async {
-    final db = await SQLHelper.db();
-    try {
-      await db.delete("attribution", where: "id = ?", whereArgs: [id]);
-    } catch (err) {
-      debugPrint("Something went wrong when deleting an item: $err");
-    }
-  }*/
 }

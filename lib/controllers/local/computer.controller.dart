@@ -2,6 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gao_flutter/database/db.provider.dart';
 import 'package:gao_flutter/providers/api/ComputerProvider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 
@@ -17,26 +18,26 @@ class Computers{
     var offset = (page - 1) * 3;
     // If no connection fetch data from API
     if (connectionStatus != ConnectivityResult.none){
-      computers = await ComputerAPIProvider().fetchComputer(date, page);
+      computers = await ComputerAPIProvider().fetchComputer(date, page, connectionStatus);
       return computers;
     };
-    computers = await DBProvider.instance.queryAllRows('computer', {"limit": 3, "offset": offset});
+    computers = await DBProvider.instance.queryAllRows('computer', {"limit": 3, "offset": offset, 'orderBy':'id ASC'});
+    print(await DBProvider.instance.queryRowCount("computer"));
+
     return computers;
   }
 
-  // Update an item by id
-  static Future<int> updateComputer(int id, String name) async {
-    final data = {'name': name };
-    final result = await DBProvider.instance.update(data, id, 'computer');
-    return result;
+  static Future getComputerSize(connectionStatus) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var pageSize;
+    if (connectionStatus != ConnectivityResult.none) {
+       pageSize = await ComputerAPIProvider().fetchPageSize();
+      await prefs.setString('computerLength', pageSize.toString());
+    }
+    pageSize = prefs.getString('computerLength');
+
+    return pageSize;
+
   }
 
-  // Delete
-  static Future<void> deleteComputer(int id) async {
-    try {
-      await DBProvider.instance.delete(id, "computer");
-    } catch (err) {
-      debugPrint("Something went wrong when deleting an item: $err");
-    }
-  }
 }

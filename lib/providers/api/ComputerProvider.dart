@@ -2,41 +2,60 @@ import 'dart:convert';
 import 'package:gao_flutter/conf/api.dart';
 import 'package:gao_flutter/database/sync.local.db.dart';
 import 'package:gao_flutter/models/computer.dart';
-import 'package:gao_flutter/utils/shared_pref.dart';
 import 'package:gao_flutter/utils/snackbar.notif.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class ComputerAPIProvider extends ApiConf {
+  fetchPageSize() async {
+    final response = await http.get(Uri.parse(apiUrl + 'computers/size'), headers: {});
+    return response.body;
+  }
 
-  Future<List> fetchComputer(date, page) async {
-    final response = await http.get(Uri.parse(apiUrl + 'computers?date='+ date.toString() +'&page=' + page.toString()), headers: {});
-    await fetchPageSize();
+
+  syncAllData(date) async{
+    final pageSize = await fetchPageSize();
+    var response;
+    int i = 1;
+    while(i <= int.parse(pageSize)){
+      response = await http.get(Uri.parse(apiUrl + 'computers?date=' + date.toString() + '&page=' + i.toString()), headers: {});
+      var jsonResponse = json.decode(response.body);
+      if (response.statusCode == 200) {
+        jsonResponse.forEach((data) async {
+          LocalDatabase.sync(Computer.fromJson(data));
+        });
+        i++;
+      } else {
+        throw Exception('Failed to load computers');
+      }
+    }
+
+  }
+
+
+  Future<List> fetchComputer(date, page, connectionStatus) async {
+    syncAllData(date);
+    var response = await http.get(Uri.parse(apiUrl + 'computers?date=' + date.toString() + '&page=' + page.toString()), headers: {});
+
+    List computers = [];
     var jsonResponse = json.decode(response.body);
 
     if (response.statusCode == 200) {
-      List computers = [];
       jsonResponse.forEach((data) async {
-        LocalDatabase.sync(Computer.fromJson(data));
         computers.add(data);
       });
-      return computers;
-    } else {
+    }else {
       throw Exception('Failed to load computers');
     }
+    return computers;
   }
 
-  fetchPageSize() async {
-    final response = await http.get(Uri.parse(apiUrl + 'computers/size'), headers: {});
-    sharedPref().save('computerSize', response.body);
-
-    return response.body.toString();
-  }
 
   createComputer(name, context) async{
     final response =  await http.post(Uri.parse(apiUrl + 'computer/create'), body: {'name': name});
     if (response.statusCode != 200){
-      return SendNotificationSnackBar('Une erreur est survenue', context);
+      return SendErrorNotificationSnackBar(context);
     }
     return SendNotificationSnackBar('Poste ajouté avec succès !', context);
   }
@@ -46,7 +65,7 @@ class ComputerAPIProvider extends ApiConf {
     print(response.statusCode);
 
     if (response.statusCode != 200){
-      return SendNotificationSnackBar('Une erreur est survenue', context);
+      return SendErrorNotificationSnackBar(context);
     }
     return SendNotificationSnackBar('Poste modifié avec succès !', context);
   }
@@ -54,7 +73,7 @@ class ComputerAPIProvider extends ApiConf {
   deleteComputer(id, context) async{
     final response =  await http.post(Uri.parse(apiUrl + 'computer/remove'), body: {'id': id.toString()});
     if (response.statusCode != 200){
-      return SendNotificationSnackBar('Une erreur est survenue', context);
+      return SendErrorNotificationSnackBar(context);
     }
     return SendNotificationSnackBar('Poste supprimé avec succès !', context);
   }

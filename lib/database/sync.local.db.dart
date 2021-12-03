@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:gao_flutter/database/db.provider.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 
@@ -18,6 +19,7 @@ class LocalDatabase{
   }
 
   static deleteAllFromTable(table) async {
+    print({"deletion of " + table});
     await DBProvider.instance.deleteQuery("delete from "+ table);
   }
 

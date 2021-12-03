@@ -5,10 +5,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gao_flutter/models/computer.dart';
+import 'package:gao_flutter/providers/api/ComputerProvider.dart';
 import 'package:gao_flutter/utils/shared_pref.dart';
 import 'package:gao_flutter/utils/snackbar.notif.dart';
 import 'package:gao_flutter/view/login.dart';
 import 'package:gao_flutter/controllers/local/computer.controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'components/computer.dart';
 import 'components/modals/computer.modal.dart';
 import 'components/modals/remove.computer.modal.dart';
@@ -21,8 +23,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  StreamController<Computer> _streamController = StreamController();
   ConnectivityResult _connectionStatus = ConnectivityResult.none;
   final Connectivity _connectivity = Connectivity();
   late StreamSubscription<ConnectivityResult> subscription;
@@ -31,21 +33,22 @@ class _HomePageState extends State<HomePage> {
   List _attributions = [];
 
   int currentPage = 1;
-  String _totalPageSize = "0";
+  var _totalPageSize = '0';
   DateTime currentDate = DateTime.now();
   bool _isLoading = true;
 
 
   // This function is used to fetch all data from the database
   void _refreshData() async {
+    final SharedPreferences prefs = await _prefs;
     final computer = await Computers.getComputers(_connectionStatus, currentDate, currentPage);
-    final pageSize = await sharedPref().read('computerSize');
+    final pageSize = await Computers.getComputerSize(_connectionStatus);
     print({"computers", computer});
     if (!mounted) return;
       setState(() {
         _computers = computer;
         _isLoading = false;
-        _totalPageSize = pageSize;
+        _totalPageSize = pageSize ?? '0';
       });
   }
 
@@ -54,6 +57,8 @@ class _HomePageState extends State<HomePage> {
   void initState()  {
     super.initState();
     subscription = Connectivity().onConnectivityChanged.listen(_updateConnectionStatus);
+
+    //syncData();
   }
 
 
@@ -188,16 +193,18 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(
                       width: 20,
                     ),
-                    Text('Page ' + currentPage.toString() + '/' + _totalPageSize),
+                    Text('Page ' + currentPage.toString() + '/' + _totalPageSize.toString()),
                     const SizedBox(
                       width: 20,
                     ),
-                    ElevatedButton(onPressed: () async {
-                      setState(() {
-                        currentPage = currentPage + 1;
-                      });
-                      _refreshData();
-
+                    ElevatedButton(onPressed: () {
+                      print({currentPage, int.parse(_totalPageSize)});
+                      if (currentPage != int.parse(_totalPageSize)) {
+                        setState(() {
+                          currentPage = currentPage + 1;
+                        });
+                        _refreshData();
+                      }
                     },  child: Icon(Icons.arrow_forward_ios)),
                   ],
                 ),

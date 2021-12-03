@@ -82,7 +82,7 @@ class DBProvider {
   Future<List<Map<String, dynamic>>> queryAllRows(table, options) async {
     Database db = await instance.database;
     if (options != null){
-      return await db.query(table, limit: options['limit'] , offset: options['offset']);
+      return await db.query(table, limit: options['limit'] , offset: options['offset'], orderBy: options['orderBy']);
     }
     return await db.query(table);
   }
@@ -94,8 +94,12 @@ class DBProvider {
 
   deleteQuery(rawQuery) async {
     Database db = await instance.database;
-    var batch = db.batch();
-    await db.transaction((txn) async { batch.rawQuery(rawQuery);}
+
+    await db.transaction((txn) async {
+      var batch = txn.batch();
+      batch.rawQuery(rawQuery);
+      await batch.commit();
+    }
     );
   }
   // All of the methods (insert, query, update, delete) can also be done using
